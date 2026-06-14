@@ -4,7 +4,7 @@ services:
     env: python
     region: singapore
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
+    buildCommand: cd backend && pip install -r requirements.txt
     startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: PYTHON_VERSION
@@ -41,15 +41,3 @@ services:
         value: 10000
       - key: HOST
         value: 0.0.0.0
-
-  - type: static
-    name: whatsapp-saas-frontend
-    env: static
-    region: singapore
-    plan: free
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/dist/whatsapp-saas-frontend/browser
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
