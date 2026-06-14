@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-backend-url.onrender.com',
+  apiUrl: 'https://whatsapp-saas-backend-wlw9.onrender.com',
+  superAdminEmail: 'admin@example.com',
   firebase: {
     apiKey: "AIzaSyCY_sOT-CjwOwn5WtQkAHrrDdsOvO7xpK8",
     authDomain: "whatsapp-notify-service.firebaseapp.com",

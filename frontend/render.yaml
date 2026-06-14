@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: whatsapp-saas-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist/whatsapp-saas-frontend/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
