@@ -20,16 +20,31 @@ class FirebaseDB:
         """Initialize Firebase Admin SDK"""
         try:
             if not firebase_admin._apps:
-                cred_path = os.getenv('FIREBASE_CREDENTIALS_PATH', 'firebase-credentials.json')
+                # Try to get credentials from environment variable (JSON string)
+                cred_json = os.getenv('FIREBASE_CREDENTIALS_JSON')
                 
-                if os.path.exists(cred_path):
-                    cred = credentials.Certificate(cred_path)
+                if cred_json:
+                    # Production: Use JSON string from environment
+                    import json
+                    cred_dict = json.loads(cred_json)
+                    cred = credentials.Certificate(cred_dict)
                     firebase_admin.initialize_app(cred)
+                    logger.info("Firebase initialized from environment JSON")
                 else:
-                    firebase_admin.initialize_app()
+                    # Local: Use file path
+                    cred_path = os.getenv('FIREBASE_CREDENTIALS_PATH', 'firebase-credentials.json')
+                    
+                    if os.path.exists(cred_path):
+                        cred = credentials.Certificate(cred_path)
+                        firebase_admin.initialize_app(cred)
+                        logger.info("Firebase initialized from file")
+                    else:
+                        # Fallback to default credentials (won't work on Render)
+                        firebase_admin.initialize_app()
+                        logger.warning("Firebase initialized with default credentials")
                 
                 self._db = firestore.client()
-                logger.info("Firebase initialized successfully")
+                logger.info("Firebase Firestore client created successfully")
         except Exception as e:
             logger.error(f"Firebase initialization error: {str(e)}")
             raise
