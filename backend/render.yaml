@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: whatsapp-saas-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --timeout 120 --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: PHONE_NUMBER_ID
+        value: 1092397067300949
+      - key: WABA_ID
+        value: 1511512567022058
+      - key: VERIFY_TOKEN
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        value: whatsapp-notify-service
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dhztv69b6
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: SUPER_ADMIN_EMAIL
+        sync: false

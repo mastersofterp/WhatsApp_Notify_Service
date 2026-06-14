@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && request.auth.token.email == 'admin@example.com';
+    }
+    
+    function isBusinessOwner(businessId) {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/businesses/$(businessId)).data.owner_email == request.auth.token.email;
+    }
+    
+    function isSystemRequest() {
+      // Backend service account has special permissions
+      return request.auth.token.email.matches('.*@whatsapp-notify-service.iam.gserviceaccount.com');
+    }
+    
+    // Businesses collection
+    match /businesses/{businessId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(businessId));
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin() || isBusinessOwner(businessId);
+      allow delete: if isSuperAdmin();
+      
+      // Business settings subcollection
+      match /settings/{settingId} {
+        allow read, write: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(businessId));
+      }
+      
+      // Menu subcollection
+      match /menu/{itemId} {
+        allow read: if true; // Public read for WhatsApp bot
+        allow write: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(businessId));
+      }
+    }
+    
+    // Customers collection
+    match /customers/{customerId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(resource.data.business_id));
+      allow create: if isSystemRequest() || (isAuthenticated() && (isSuperAdmin() || isBusinessOwner(request.resource.data.business_id)));
+      allow update: if isSystemRequest() || (isAuthenticated() && (isSuperAdmin() || isBusinessOwner(resource.data.business_id)));
+      allow delete: if isSuperAdmin();
+    }
+    
+    // Orders collection
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(resource.data.business_id));
+      allow create: if isSystemRequest() || (isAuthenticated() && (isSuperAdmin() || isBusinessOwner(request.resource.data.business_id)));
+      allow update: if isSystemRequest() || (isAuthenticated() && (isSuperAdmin() || isBusinessOwner(resource.data.business_id)));
+      allow delete: if isSuperAdmin();
+    }
+    
+    // Conversations collection (system only for writes)
+    match /conversations/{conversationId} {
+      allow read: if isAuthenticated();
+      allow write: if isSystemRequest(); // Only backend can write conversations
+    }
+    
+    // Campaigns collection
+    match /campaigns/{campaignId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(resource.data.business_id));
+      allow create: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(request.resource.data.business_id));
+      allow update: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(resource.data.business_id));
+      allow delete: if isSuperAdmin();
+    }
+    
+    // Payments collection (for payment link tracking)
+    match /payments/{paymentId} {
+      allow read: if true; // Public read for payment page
+      allow write: if isSystemRequest(); // Only backend can write
+    }
+    
+    // Analytics collection (optional - for caching analytics data)
+    match /analytics/{analyticsId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || isBusinessOwner(resource.data.business_id));
+      allow write: if isSystemRequest();
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

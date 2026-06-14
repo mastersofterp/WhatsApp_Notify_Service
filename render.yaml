@@ -1,0 +1,55 @@
+services:
+  - type: web
+    name: whatsapp-saas-backend
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: False
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: PHONE_NUMBER_ID
+        value: 1092397067300949
+      - key: WABA_ID
+        value: 1511512567022058
+      - key: VERIFY_TOKEN
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        value: whatsapp-notify-service
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dhztv69b6
+      - key: CLOUDINARY_API_KEY
+        value: 252654937128354
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: PAYMENT_SECRET_KEY
+        sync: false
+      - key: PAYMENT_EXPIRY_MINUTES
+        value: 30
+      - key: SUPER_ADMIN_EMAIL
+        value: admin@example.com
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+
+  - type: static
+    name: whatsapp-saas-frontend
+    env: static
+    region: singapore
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist/whatsapp-saas-frontend/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

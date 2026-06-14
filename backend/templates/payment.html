@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - {{ business_name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px 20px;
+        }
+        
+        .status-banner {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .status-banner.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-banner.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-banner.expired {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .order-summary {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .order-summary h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 18px;
+            color: #667eea;
+            padding-top: 15px;
+        }
+        
+        .timer {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .timer-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+        
+        .timer-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .timer-value.warning {
+            color: #f59e0b;
+        }
+        
+        .timer-value.danger {
+            color: #ef4444;
+        }
+        
+        .payment-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .payment-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .payment-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .payment-btn.gpay {
+            background: #4285f4;
+            color: white;
+        }
+        
+        .payment-btn.phonepe {
+            background: #5f259f;
+            color: white;
+        }
+        
+        .payment-btn.paytm {
+            background: #00baf2;
+            color: white;
+        }
+        
+        .payment-btn:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .confirm-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .confirm-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 14px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .timer-value {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                {% if logo_url %}
+                <img src="{{ logo_url }}" alt="{{ business_name }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                🛍️
+                {% endif %}
+            </div>
+            <h1>{{ business_name }}</h1>
+            <p>Secure Payment</p>
+        </div>
+        
+        <div class="content">
+            {% if status == 'expired' %}
+            <div class="status-banner expired">
+                ⏰ This payment link has expired
+            </div>
+            <p style="text-align: center; color: #6b7280;">Please contact the business to get a new payment link.</p>
+            
+            {% elif status == 'paid' %}
+            <div class="status-banner success">
+                ✅ Payment already received!
+            </div>
+            <p style="text-align: center; color: #6b7280;">Thank you for your payment. Your order is being processed.</p>
+            
+            {% else %}
+            <div class="order-summary">
+                <h2>Order Summary</h2>
+                {% for item in order_items %}
+                <div class="order-item">
+                    <span>{{ item.name }} ({{ item.quantity }}x)</span>
+                    <span>₹{{ item.price }}</span>
+                </div>
+                {% endfor %}
+                <div class="order-item">
+                    <span>Total Amount</span>
+                    <span>₹{{ total_amount }}</span>
+                </div>
+            </div>
+            
+            <div class="timer">
+                <div class="timer-label">Time Remaining</div>
+                <div class="timer-value" id="timer">30:00</div>
+            </div>
+            
+            <div class="payment-buttons">
+                <a href="upi://pay?pa={{ upi_id }}&pn={{ business_name }}&am={{ total_amount }}&tn=Order%20{{ order_id }}" class="payment-btn gpay">
+                    <span>💳</span> Pay with GPay
+                </a>
+                <a href="phonepe://pay?pa={{ upi_id }}&pn={{ business_name }}&am={{ total_amount }}&tn=Order%20{{ order_id }}" class="payment-btn phonepe">
+                    <span>📱</span> Pay with PhonePe
+                </a>
+                <a href="paytmmp://pay?pa={{ upi_id }}&pn={{ business_name }}&am={{ total_amount }}&tn=Order%20{{ order_id }}" class="payment-btn paytm">
+                    <span>💰</span> Pay with Paytm
+                </a>
+            </div>
+            
+            <button class="confirm-btn" onclick="confirmPayment()">
+                ✓ I have completed payment
+            </button>
+            {% endif %}
+        </div>
+        
+        <div class="footer">
+            🔒 Secured by {{ business_name }}
+        </div>
+    </div>
+    
+    <script>
+        {% if status != 'expired' and status != 'paid' %}
+        // Countdown timer
+        let timeLeft = {{ expiry_seconds }};
+        const timerElement = document.getElementById('timer');
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 300) { // 5 minutes
+                timerElement.classList.add('warning');
+            }
+            if (timeLeft <= 60) { // 1 minute
+                timerElement.classList.remove('warning');
+                timerElement.classList.add('danger');
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                location.reload();
+            }
+            
+            timeLeft--;
+        }
+        
+        const timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+        
+        // Confirm payment function
+        function confirmPayment() {
+            if (confirm('Have you completed the payment?')) {
+                fetch('/pay/confirm/{{ order_id }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Thank you! Your payment confirmation has been received. You will receive a WhatsApp message shortly.');
+                        location.reload();
+                    } else {
+                        alert('Failed to confirm payment. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to confirm payment. Please try again.');
+                });
+            }
+        }
+        {% endif %}
+    </script>
+</body>
+</html>
